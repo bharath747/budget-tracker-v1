@@ -1,11 +1,6 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    { "source": "/", "destination": "/tracker.html" },
-    { "source": "/tracker", "destination": "/tracker.html" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/analytics", "destination": "/analytics.html" },
-    { "source": "/loan", "destination": "/loan.html" },
-    { "source": "/lend", "destination": "/lend.html" }
+  "version": 2,
+  "routes": [
+    { "src": "^/(.*)$", "dest": "/api/index.js" }
   ]
 }
