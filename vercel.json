@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/", "destination": "/tracker.html" },
+    { "source": "/tracker", "destination": "/tracker.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/analytics", "destination": "/analytics.html" },
+    { "source": "/loan", "destination": "/loan.html" },
+    { "source": "/lend", "destination": "/lend.html" }
+  ]
+}
