@@ -1,333 +1,213 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B9Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4u02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
     <script src="tracker.js"></script>
+    <style>
+        .form-group { padding-left: 1px; }
+        .table-fixed { width: 100%; background-color: #f3f3f3; }
+        .table-fixed tbody { overflow-y: auto; width: 100%; }
+        .table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td, .table-fixed th { display: flow-root; }
+        .table-fixed tbody td { float: left; }
+        .table-fixed thead tr th { float: left; background-color: #f39c12; border-color: #e67e22; }
+        .chart-card { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 20px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+        .chart-container { position: relative; height: 320px; }
+        .chart-empty { text-align: center; color: #777; padding-top: 120px; }
+    </style>
 </head>
-
-<style>
-    .form-group { padding-left: 1px; }
-
-    .table-fixed { width: 100%; background-color: #f3f3f3; }
-    .table-fixed tbody { overflow-y: auto; width: 100%; }
-    .table-fixed thead, .table-fixed tbody, .table-fixed tr,
-    .table-fixed td, .table-fixed th { display: flow-root; }
-    .table-fixed tbody td { float: left; }
-    .table-fixed thead tr th {
-        float: left;
-        background-color: #f39c12;
-        border-color: #e67e22;
-    }
-
-    .chart-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-        background: #fff;
-        box-shadow: 0 1px 4px rgba(0,0,0,.08);
-    }
-
-    .chart-container {
-        position: relative;
-        height: 320px;
-    }
-
-    .chart-empty {
-        text-align: center;
-        color: #777;
-        padding-top: 120px;
-    }
-</style>
-
 <body>
-    <div ng-app="myApp" ng-controller="appCtrl" ng-init="my_app_init(); loadAnalyticsCharts()">
-        <div class="container-fluid" style="margin-top: 1%;">
+<div ng-app="myApp" ng-controller="appCtrl" ng-init="my_app_init()">
+    <div class="container-fluid" style="margin-top:1%;">
+        <nav class="navbar navbar-dark bg-dark" style="margin-bottom:2%">
+            <span class="col-10" style="text-align:center;font-weight:600;color:white">
+                <a ng-href="{{redirectToPage('tracker.html')}}" style="color:white;">Budget Tracker</a>
+            </span>
+            <span class="col-2" style="font-weight:600;margin-bottom:1px;" ng-click="printTransactions()"><button style="border-radius:6px">Print</button></span>
+        </nav>
 
-            <nav class="navbar navbar-dark bg-dark" style="margin-bottom: 2%">
-                <span class="col-10" style="text-align: center;font-weight: 600; color: white">
-                    <a ng-href="{{redirectToPage('tracker.html')}}" style="color:white;">Budget Tracker</a>
-                </span>
-                <span class="col-2" style="font-weight: 600;margin-bottom: 1px;"
-                    ng-click="printTransactions()"><button style="border-radius: 6px">Print</button></span>
-            </nav>
-
-            <div class="accordion" id="inputForms">
-                <div class="card">
-                    <div class="card-header" id="addSourceForm">
-                        <h2 class="mb-0">
-                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
-                                data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                Add KeyWord Filters
-                            </button>
-                        </h2>
+        <div class="accordion" id="inputForms">
+            <div class="card">
+                <div class="card-header" id="addSourceForm">
+                    <h2 class="mb-0"><button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseOne">Add KeyWord Filters</button></h2>
+                </div>
+                <div id="collapseOne" class="collapse" data-parent="#inputForms">
+                    <div class="card-body">
+                        <form class="form-inline col-12" autocomplete="on">
+                            <div class="form-group col-8"><input type="text" class="form-control" ng-model="filterKeyWord" placeholder="Enter Key Word"></div>
+                            <div class="form-group col-4"><button type="submit" class="btn btn-primary col-12" ng-click="addAnalyticsFilterKeyWords(filterKeyWord)">Add</button></div>
+                        </form>
+                        <ul><li ng-repeat="keyWord in analyticsFilterKeyWords">{{keyWord}} <span style="padding-left:5%;cursor:pointer" ng-click="deleteAnalyticsFilterKeyWords(keyWord)">x</span></li></ul>
                     </div>
-                    <div id="collapseOne" class="collapse" aria-labelledby="addSourceForm" data-parent="#inputForms">
-                        <div class="card-body">
-                            <form class="form-inline col-12" autocomplete="on">
-                                <div class="form-group col-8">
-                                    <input type="text" class="form-control" ng-model="filterKeyWord"
-                                        placeholder="Enter Key Word">
-                                </div>
-                                <div class="form-group col-4">
-                                    <button type="submit" class="btn btn-primary col-12"
-                                        style="padding: 4px 1px 4px 1px;"
-                                        ng-click="addAnalyticsFilterKeyWords(filterKeyWord)">Add</button>
-                                </div>
-                            </form>
-                            <ul>
-                                <li ng-repeat="keyWord in analyticsFilterKeyWords">
-                                    {{keyWord}} <span style="padding-left: 5%; cursor:pointer"
-                                        ng-click="deleteAnalyticsFilterKeyWords(keyWord)">x</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Simple grouped analytics -->
-            <div class="row" style="margin: 1%; margin-top: 4%;">
-                <div class="col-12" style="text-align:center; font-weight:600; margin-bottom:15px;">
-                    Spending & Credit Analytics
-                </div>
-
-                <div class="col-md-6">
-                    <div class="chart-card">
-                        <h5 style="text-align:center;">Expenses by Description</h5>
-                        <div class="chart-container" ng-if="expenseChartHasData">
-                            <canvas id="expensePieChart"></canvas>
-                        </div>
-                        <div class="chart-empty" ng-if="!expenseChartHasData">No expense data available</div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="chart-card">
-                        <h5 style="text-align:center;">Credits by Source</h5>
-                        <div class="chart-container" ng-if="creditChartHasData">
-                            <canvas id="creditPieChart"></canvas>
-                        </div>
-                        <div class="chart-empty" ng-if="!creditChartHasData">No credit data available</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row" style="margin: 1%; margin-top: 2%;">
-                <span class="col-12" style="text-align: center; font-weight: 600;">Transactions</span>
-                <span class="col-10" style="font-weight: 600;margin-left: -4%;margin-bottom: 4%;">Total Expenses : {{totalExpenses.totalAmount}}</span>
-
-                <div class="row" ng-repeat="monthSummary in totalExpenses.transactions | orderBy: 'sortKey':true" ng-if="monthSummary.expenses.length > 0">
-                    <span class="col-12" style="text-align: center; font-weight: 600;">{{monthSummary.displayHeader}}</span>
-                    <span class="col-10" style="font-weight: 600;">Total Expenses : {{monthSummary.totalExpenses}}</span>
-
-                    <table class="table table-fixed col-12">
-                        <thead>
-                            <tr>
-                                <th class="col-4">Date</th>
-                                <th class="col-5">Description</th>
-                                <th class="col-3">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="expense in monthSummary.expenses | orderBy: 'date':true">
-                                <td class="col-4" style="padding-left: 0">{{formatDate(expense.date)}}</td>
-                                <td class="col-5">{{expense.description}}</td>
-                                <td class="col-3">{{expense.amount}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="row" style="margin: 1%; margin-top: 4%" id="expenseTransactions" ng-show="false">
-                <div class="col-10" style="font-weight: 600;text-align: center;">Total Expenses : {{totalExpenses.totalAmount}}</div>
-
-                <div class="row" ng-repeat="monthSummary in totalExpenses.transactions | orderBy: 'sortKey':true" ng-if="monthSummary.expenses.length > 0">
-                    <div class="col-12" style="text-align: center; font-weight: 600;margin-top: 1%;">{{monthSummary.displayHeader}}</div>
-                    <br>
-                    <span class="col-10" style="font-weight: 600;margin-bottom: 1%;"> Expense Amount : {{monthSummary.totalExpenses}}</span>
-
-                    <table class="table table-fixed col-12" style="margin-top:1%">
-                        <thead>
-                            <tr>
-                                <th class="col-4" style="text-align: left;padding-left: 0.6%;">Date</th>
-                                <th class="col-5" style="text-align: left;padding-left: 2%;">Description</th>
-                                <th class="col-3" style="text-align: left;padding-left: 2%;">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="expense in monthSummary.expenses | orderBy: 'date':true">
-                                <td class="col-4" style="padding-left: 0.6%">{{formatDate(expense.date)}}</td>
-                                <td class="col-5">{{expense.description}}</td>
-                                <td class="col-3">{{expense.amount}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
+
+        <div class="row" style="margin:1%;margin-top:4%;">
+            <div class="col-12" style="text-align:center;font-weight:600;margin-bottom:15px;">Spending &amp; Credit Analytics</div>
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <h5 style="text-align:center;">Expenses by Description</h5>
+                    <div class="chart-container"><canvas id="expensePieChart"></canvas></div>
+                    <div class="chart-empty" ng-if="expenseChartsLoaded && !expenseChartHasData">No expense data available</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-card">
+                    <h5 style="text-align:center;">Credits by Source</h5>
+                    <div class="chart-container"><canvas id="creditPieChart"></canvas></div>
+                    <div class="chart-empty" ng-if="creditChartsLoaded && !creditChartHasData">No credit data available</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin:1%;margin-top:2%;">
+            <span class="col-12" style="text-align:center;font-weight:600;">Transactions</span>
+            <span class="col-10" style="font-weight:600;margin-left:-4%;margin-bottom:4%;">Total Expenses : {{totalExpenses.totalAmount}}</span>
+            <div class="row" ng-repeat="monthSummary in totalExpenses.transactions | orderBy:'sortKey':true" ng-if="monthSummary.expenses.length > 0">
+                <span class="col-12" style="text-align:center;font-weight:600;">{{monthSummary.displayHeader}}</span>
+                <span class="col-10" style="font-weight:600;">Total Expenses : {{monthSummary.totalExpenses}}</span>
+                <table class="table table-fixed col-12">
+                    <thead><tr><th class="col-4">Date</th><th class="col-5">Description</th><th class="col-3">Amount</th></tr></thead>
+                    <tbody><tr ng-repeat="expense in monthSummary.expenses | orderBy:'date':true"><td class="col-4" style="padding-left:0">{{formatDate(expense.date)}}</td><td class="col-5">{{expense.description}}</td><td class="col-3">{{expense.amount}}</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row" style="margin:1%;margin-top:4%" id="expenseTransactions" ng-show="false">
+            <div class="col-10" style="font-weight:600;text-align:center;">Total Expenses : {{totalExpenses.totalAmount}}</div>
+            <div class="row" ng-repeat="monthSummary in totalExpenses.transactions | orderBy:'sortKey':true" ng-if="monthSummary.expenses.length > 0">
+                <div class="col-12" style="text-align:center;font-weight:600;margin-top:1%;">{{monthSummary.displayHeader}}</div>
+                <br><span class="col-10" style="font-weight:600;margin-bottom:1%;">Expense Amount : {{monthSummary.totalExpenses}}</span>
+                <table class="table table-fixed col-12" style="margin-top:1%">
+                    <thead><tr><th class="col-4">Date</th><th class="col-5">Description</th><th class="col-3">Amount</th></tr></thead>
+                    <tbody><tr ng-repeat="expense in monthSummary.expenses | orderBy:'date':true"><td class="col-4">{{formatDate(expense.date)}}</td><td class="col-5">{{expense.description}}</td><td class="col-3">{{expense.amount}}</td></tr></tbody>
+                </table>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        // The existing tracker.js owns the Angular controller and IndexedDB schema.
-        // Analytics reads the same data and groups expenses by description and credits by source.
-        (function () {
-            var originalInit = null;
-            var chartState = { expense: null, credit: null };
+<script>
+(function () {
+    var charts = { expense: null, credit: null };
 
-            function getDatabase() {
-                return new Promise(function (resolve, reject) {
-                    var request = indexedDB.open('budget-tracker', 1);
-                    request.onsuccess = function () { resolve(request.result); };
-                    request.onerror = function (event) { reject(event); };
-                });
-            }
+    function openDb() {
+        return new Promise(function(resolve, reject) {
+            var request = indexedDB.open('budget-tracker', 1);
+            request.onsuccess = function() { resolve(request.result); };
+            request.onerror = function(e) { reject(e); };
+        });
+    }
 
-            function getStoreData(db, storeName) {
-                return new Promise(function (resolve, reject) {
-                    var tx = db.transaction(storeName, 'readonly');
-                    var store = tx.objectStore(storeName);
-                    var request = store.getAll();
-                    request.onsuccess = function () { resolve(request.result || []); };
-                    request.onerror = function (event) { reject(event); };
-                });
-            }
+    function readAll(db, storeName) {
+        return new Promise(function(resolve, reject) {
+            try {
+                var request = db.transaction(storeName, 'readonly').objectStore(storeName).getAll();
+                request.onsuccess = function() { resolve(request.result || []); };
+                request.onerror = function(e) { reject(e); };
+            } catch (e) { reject(e); }
+        });
+    }
 
-            function hasText(list, text) {
-                if (!text || !list) return false;
-                for (var i = 0; i < list.length; i++) {
-                    if (text.toLowerCase().indexOf(String(list[i]).toLowerCase()) > -1) return true;
-                }
-                return false;
-            }
+    function containsText(list, text) {
+        if (!text) return false;
+        text = String(text).toLowerCase();
+        return (list || []).some(function(item) { return text.indexOf(String(item).toLowerCase()) !== -1; });
+    }
 
-            function isEligibleCandidate(mainFilter, subFilter, text) {
-                mainFilter = mainFilter || [];
-                subFilter = subFilter || [];
-                if (mainFilter.length === 0 && subFilter.length === 0) return true;
-                if (mainFilter.length > 0 && subFilter.length === 0) {
-                    return mainFilter.indexOf(text) === -1 && !hasText(mainFilter, text);
-                }
-                if (subFilter.length > 0 && mainFilter.length === 0) return hasText(subFilter, text);
-                return mainFilter.indexOf(text) === -1 && !hasText(mainFilter, text) && hasText(subFilter, text);
-            }
+    function eligible(excludeFilters, includeFilters, text) {
+        excludeFilters = excludeFilters || [];
+        includeFilters = includeFilters || [];
+        if (!excludeFilters.length && !includeFilters.length) return true;
+        var excluded = excludeFilters.indexOf(text) !== -1 || containsText(excludeFilters, text);
+        var included = containsText(includeFilters, text);
+        if (excludeFilters.length && !includeFilters.length) return !excluded;
+        if (!excludeFilters.length && includeFilters.length) return included;
+        return !excluded && included;
+    }
 
-            function addGroupedValue(group, key, amount) {
-                key = key == null || String(key).trim() === '' ? 'Unspecified' : String(key).trim();
-                amount = Number(amount) || 0;
-                group[key] = (group[key] || 0) + Math.abs(amount);
-            }
+    function group(items, keyName, filterFn) {
+        var result = {};
+        (items || []).forEach(function(item) {
+            var key = item && item[keyName] != null ? String(item[keyName]).trim() : '';
+            key = key || 'Unspecified';
+            if (filterFn && !filterFn(item)) return;
+            var amount = Number(item && item.amount);
+            if (!isFinite(amount)) return;
+            result[key] = (result[key] || 0) + Math.abs(amount);
+        });
+        return Object.keys(result).map(function(key) { return { label:key, value:result[key] }; })
+            .sort(function(a,b) { return b.value-a.value; });
+    }
 
-            function toChartData(group) {
-                return Object.keys(group)
-                    .map(function (key) { return { label: key, value: group[key] }; })
-                    .sort(function (a, b) { return b.value - a.value; });
-            }
+    function draw(id, data, oldChart) {
+        var canvas = document.getElementById(id);
+        if (!canvas || typeof Chart === 'undefined') return oldChart;
+        if (oldChart) oldChart.destroy();
+        if (!data.length) return null;
+        return new Chart(canvas.getContext('2d'), {
+            type:'pie',
+            data:{ labels:data.map(function(x){return x.label;}), datasets:[{data:data.map(function(x){return x.value;})}] },
+            options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'}, tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+Number(c.raw).toLocaleString('en-IN');}}} } }
+        });
+    }
 
-            function drawPieChart(canvasId, groupedData, existingChart) {
-                var canvas = document.getElementById(canvasId);
-                if (!canvas) return existingChart;
+    window.loadAnalyticsCharts = function() {
+        var root = document.querySelector('[ng-controller="appCtrl"]');
+        var scope = root ? angular.element(root).scope() : null;
+        if (!scope) return;
 
-                if (existingChart) existingChart.destroy();
+        openDb().then(function(db) {
+            return Promise.all([readAll(db,'month-summary'), readAll(db,'source-info'), readAll(db,'filters-info')])
+                .then(function(rows) {
+                    db.close();
+                    var months = rows[0], sourceRows = rows[1], filterRows = rows[2];
+                    var selectedSource = sourceRows.length && sourceRows[0].selectedSource ? sourceRows[0].selectedSource : 'default';
+                    var excludeFilters = filterRows.length && filterRows[0].filters ? filterRows[0].filters : [];
+                    var includeFilters = scope.analyticsFilterKeyWords || [];
+                    var expenses = [], credits = [];
 
-                if (groupedData.length === 0) return null;
-
-                return new Chart(canvas.getContext('2d'), {
-                    type: 'pie',
-                    data: {
-                        labels: groupedData.map(function (item) { return item.label; }),
-                        datasets: [{
-                            data: groupedData.map(function (item) { return item.value; })
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom' },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        var value = Number(context.raw || 0);
-                                        return ' ' + context.label + ': ' + value.toLocaleString('en-IN');
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            window.loadAnalyticsCharts = function () {
-                var scope = angular.element(document.querySelector('[ng-controller="appCtrl"]')).scope();
-                getDatabase().then(function (db) {
-                    return Promise.all([
-                        getStoreData(db, 'month-summary'),
-                        getStoreData(db, 'source-info'),
-                        getStoreData(db, 'filters-info')
-                    ]).then(function (result) {
-                        var months = result[0];
-                        var sourceInfoList = result[1];
-                        var filtersInfoList = result[2];
-                        db.close();
-
-                        var selectedSource = sourceInfoList.length ? sourceInfoList[0].selectedSource : 'default';
-                        var savedFilters = filtersInfoList.length ? filtersInfoList[0].filters : [];
-                        var keywordFilters = scope.analyticsFilterKeyWords || [];
-
-                        var expenses = {};
-                        var credits = {};
-
-                        months.forEach(function (month) {
-                            if (!month.id || month.id.indexOf(selectedSource) === -1) return;
-
-                            (month.expenses || []).forEach(function (expense) {
-                                if (isEligibleCandidate(savedFilters, keywordFilters, expense.description)) {
-                                    addGroupedValue(expenses, expense.description, expense.amount);
-                                }
-                            });
-
-                            (month.credits || []).forEach(function (credit) {
-                                addGroupedValue(credits, credit.source, credit.amount);
-                            });
-                        });
-
-                        scope.$applyAsync(function () {
-                            scope.expenseChartHasData = Object.keys(expenses).length > 0;
-                            scope.creditChartHasData = Object.keys(credits).length > 0;
-                            chartState.expense = drawPieChart('expensePieChart', toChartData(expenses), chartState.expense);
-                            chartState.credit = drawPieChart('creditPieChart', toChartData(credits), chartState.credit);
-                        });
+                    months.forEach(function(month) {
+                        // month ids are normally like "3-2026-default"; use the final source segment.
+                        var id = String(month.id || '');
+                        var sourceMatches = id.split('-').slice(2).join('-') === String(selectedSource) || id.indexOf('-' + selectedSource) !== -1;
+                        if (!sourceMatches) return;
+                        expenses = expenses.concat(month.expenses || []);
+                        credits = credits.concat(month.credits || []);
                     });
-                }).catch(function (error) {
-                    console.error('Unable to load analytics charts', error);
+
+                    var expenseData = group(expenses,'description',function(item){ return eligible(excludeFilters,includeFilters,item.description); });
+                    var creditData = group(credits,'source');
+
+                    // Let Angular render the canvases before Chart.js accesses them.
+                    scope.$applyAsync(function() {
+                        scope.expenseChartHasData = expenseData.length > 0;
+                        scope.creditChartHasData = creditData.length > 0;
+                        scope.expenseChartsLoaded = true;
+                        scope.creditChartsLoaded = true;
+                    });
+                    setTimeout(function() {
+                        charts.expense = draw('expensePieChart',expenseData,charts.expense);
+                        charts.credit = draw('creditPieChart',creditData,charts.credit);
+                    }, 50);
                 });
-            };
+        }).catch(function(error) {
+            console.error('Analytics chart load failed:', error);
+            scope.$applyAsync(function(){ scope.expenseChartsLoaded=true; scope.creditChartsLoaded=true; });
+        });
+    };
 
-            document.addEventListener('DOMContentLoaded', function () {
-                setTimeout(function () {
-                    if (window.loadAnalyticsCharts) window.loadAnalyticsCharts();
-                }, 500);
-            });
-        })();
-    </script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(window.loadAnalyticsCharts, 300);
+    });
+})();
+</script>
 </body>
-
 </html>
